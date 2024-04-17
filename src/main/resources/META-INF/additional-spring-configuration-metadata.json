@@ -1,14 +1,14 @@
 {
 	"properties": [
 		{
-			"name": "login.service.jwtSecret",
+			"name": "coindata.service.impl.jwtSecret",
 			"type": "java.lang.String",
-			"description": "A description for 'login.service.jwtSecret'"
+			"description": "A description for 'coindata.service.impl.jwtSecret'"
 		},
 		{
-			"name": "login.service.jwtExpirationMs",
+			"name": "coindata.service.impl.jwtExpirationMs",
 			"type": "java.lang.String",
-			"description": "A description for 'login.service.jwtExpirationMs'"
+			"description": "A description for 'coindata.service.impl.jwtExpirationMs'"
 		}
 	]
 }

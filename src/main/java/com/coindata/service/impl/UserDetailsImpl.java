@@ -10,6 +10,7 @@ import com.coindata.model.entity.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 public class UserDetailsImpl implements UserDetails {
+
 	private static final long serialVersionUID = 1L;
 
 	private Long userId;
@@ -29,7 +30,7 @@ public class UserDetailsImpl implements UserDetails {
 	}
 
 	public static UserDetailsImpl build(User user) {
-		return new UserDetailsImpl(user.getUserId(), user.getUsername(), user.getEmail(), user.getPassword());
+		return new UserDetailsImpl(user.getUserId(), user.getUsername(), user.getPassword(), user.getEmail());
 	}
 
 	@Override
@@ -57,7 +58,7 @@ public class UserDetailsImpl implements UserDetails {
 
 	@Override
 	public boolean isAccountNonExpired() {
-		return false;
+		return true;
 	}
 
 	@Override
@@ -75,6 +76,7 @@ public class UserDetailsImpl implements UserDetails {
 		return true;
 	}
 
+	@Override
 	public boolean equals(Object object) {
 		if (this == object) {
 			return true;

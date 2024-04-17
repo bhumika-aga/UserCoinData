@@ -12,6 +12,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,9 +20,11 @@ import org.springframework.web.bind.annotation.RestController;
 import com.coindata.config.JWTUtils;
 import com.coindata.exception.InvalidEmailException;
 import com.coindata.exception.InvalidUsernameException;
+import com.coindata.exception.UserNotFoundException;
 import com.coindata.model.entity.User;
 import com.coindata.model.request.LoginRequest;
 import com.coindata.model.request.SignUpRequest;
+import com.coindata.model.request.UpdateRequest;
 import com.coindata.model.response.JWTResponse;
 import com.coindata.repository.UserRepository;
 import com.coindata.service.impl.UserDetailsImpl;
@@ -82,8 +85,64 @@ public class AuthController {
 				HttpStatus.OK);
 	}
 
-//	@PutMapping("/update")
-//	public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateRequest request) {
-//		
-//	}
+	@PutMapping("/update")
+	public ResponseEntity<?> updateUser(@Valid @RequestBody UpdateRequest request) {
+
+		// Get the authenticated user's details
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+		// Check if user is logged in
+		if (userDetails != null) {
+			// Get user ID
+			String username = userDetails.getUsername();
+
+			// Update user details
+			try {
+				updateUser(username, request);
+				return ResponseEntity.ok("User details updated successfully.");
+			} catch (UserNotFoundException e) {
+				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+			} catch (InvalidUsernameException e) {
+				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+			} catch (Exception e) {
+				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+						.body("User details could not be updated");
+			}
+		} else {
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+		}
+	}
+
+	private void updateUser(String username, UpdateRequest request) throws UserNotFoundException, Exception {
+		// Retrieve the user from the database
+		User user = userRepository.findByUsername(username)
+				.orElseThrow(() -> new UserNotFoundException("User not found"));
+
+		// Check if the current user has permission to update the details
+		// This could be based on roles or any other criteria
+		// For simplicity, let's assume any logged-in user can update their own details
+		// You might want to implement more fine-grained authorization logic
+		// using Spring Security annotations or custom authorization logic
+		if (!user.getUsername().equals(username)) {
+			throw new InvalidUsernameException("Unauthorized access");
+		}
+
+		// Update the user details
+		if (request.getFirstName() != null) {
+			user.setFirstName(request.getFirstName());
+		}
+		if (request.getLastName() != null) {
+			user.setLastName(request.getLastName());
+		}
+		if (request.getMobile() != null) {
+			user.setMobile(request.getMobile());
+		}
+		if (request.getPassword() != null) {
+			user.setPassword(encoder.encode(request.getPassword()));
+		}
+
+		// Save the updated user object
+		userRepository.save(user);
+	}
 }

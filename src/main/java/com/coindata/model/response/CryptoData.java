@@ -1,6 +1,6 @@
 package com.coindata.model.response;
 
-import java.util.List;
+import java.sql.Blob;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -15,69 +15,69 @@ import jakarta.validation.constraints.NotNull;
 @Table(name = "crypto")
 public class CryptoData {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long id;
 
-    @NotNull
-    private String username;
+	@NotNull
+	private String username;
 
-    @NotNull
-    private List<String> symbols;
+	@NotNull
+	private String symbols;
 
-    @Column(nullable = false)
-    private String timestamp;
+	@Column(nullable = false)
+	private String timestamp;
 
-    @Lob
-    private byte[] data;
+	@Lob
+	private Blob data;
 
-    public Long getId() {
-        return id;
-    }
+	public Long getId() {
+		return id;
+	}
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+	public void setId(Long id) {
+		this.id = id;
+	}
 
-    public String getUsername() {
-        return username;
-    }
+	public String getUsername() {
+		return username;
+	}
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
+	public void setUsername(String username) {
+		this.username = username;
+	}
 
-    public List<String> getSymbols() {
-        return symbols;
-    }
+	public String getSymbols() {
+		return symbols;
+	}
 
-    public void setSymbols(List<String> symbols) {
-        this.symbols = symbols;
-    }
+	public void setSymbols(String symbols) {
+		this.symbols = symbols;
+	}
 
-    public String getTimestamp() {
-        return timestamp;
-    }
+	public String getTimestamp() {
+		return timestamp;
+	}
 
-    public void setTimestamp(String timestamp) {
-        this.timestamp = timestamp;
-    }
+	public void setTimestamp(String timestamp) {
+		this.timestamp = timestamp;
+	}
 
-    public byte[] getData() {
-        return data;
-    }
+	public Blob getData() {
+		return data;
+	}
 
-    public void setData(byte[] data) {
-        this.data = data;
-    }
+	public void setData(Blob data) {
+		this.data = data;
+	}
 
-    public CryptoData() {
-    }
+	public CryptoData() {
+	}
 
-    public CryptoData(@NotNull String username, @NotNull List<String> symbols, String timestamp, byte[] data) {
-        this.username = username;
-        this.symbols = symbols;
-        this.timestamp = timestamp;
-        this.data = data;
-    }
+	public CryptoData(@NotNull String username, @NotNull String symbols, String timestamp, Blob data) {
+		this.username = username;
+		this.symbols = symbols;
+		this.timestamp = timestamp;
+		this.data = data;
+	}
 }

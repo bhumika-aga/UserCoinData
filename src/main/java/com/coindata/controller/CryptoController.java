@@ -1,7 +1,12 @@
 package com.coindata.controller;
 
+import java.sql.Blob;
+import java.sql.SQLException;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.sql.rowset.serial.SerialBlob;
+import javax.sql.rowset.serial.SerialException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -73,11 +78,16 @@ public class CryptoController {
 			try {
 				for (String symbolString : symbols) {
 					byteData = new ObjectMapper().writeValueAsBytes(response.getBody().get("data").get(symbolString));
-					CryptoData data = new CryptoData(username, symbols,
-							response.getBody().get("status").get("timestamp").toString(), byteData);
+					Blob blob = new SerialBlob(byteData);
+					CryptoData data = new CryptoData(username, symbolString,
+							response.getBody().get("status").get("timestamp").toString(), blob);
 					saveResponse(username, data);
 				}
 			} catch (JsonProcessingException e) {
+				e.printStackTrace();
+			} catch (SerialException e) {
+				e.printStackTrace();
+			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 

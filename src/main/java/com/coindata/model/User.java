@@ -1,4 +1,4 @@
-package com.coindata.model.entity;
+package com.coindata.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

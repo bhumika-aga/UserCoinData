@@ -18,10 +18,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.coindata.config.JWTUtils;
-import com.coindata.exception.InvalidEmailException;
 import com.coindata.exception.InvalidUsernameException;
 import com.coindata.exception.UserNotFoundException;
-import com.coindata.model.entity.User;
+import com.coindata.model.User;
 import com.coindata.model.request.LoginRequest;
 import com.coindata.model.request.SignUpRequest;
 import com.coindata.model.request.UpdateRequest;
@@ -52,12 +51,11 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> signup(@Valid @RequestBody SignUpRequest request) {
 		if (Boolean.TRUE.equals(userRepository.existsByUsername(request.getUsername()))) {
-			return new ResponseEntity<>(new InvalidUsernameException("Username Already Exists!"),
-					HttpStatus.BAD_REQUEST);
+			return ResponseHandler.generateResponse("Username Already Exists", HttpStatus.BAD_REQUEST, null);
 		}
 
 		if (Boolean.TRUE.equals(userRepository.existsByEmail(request.getEmail()))) {
-			return new ResponseEntity<>(new InvalidEmailException("Email Already Exists!"), HttpStatus.BAD_REQUEST);
+			return ResponseHandler.generateResponse("Email Already Exists", HttpStatus.BAD_REQUEST, null);
 		}
 
 		// Create new user's account
@@ -66,7 +64,7 @@ public class AuthController {
 
 		userRepository.save(user);
 
-		return new ResponseEntity<>("User registered successfully!", HttpStatus.OK);
+		return ResponseHandler.generateResponse("User registered successfully!", HttpStatus.OK, user);
 	}
 
 	@PostMapping("/login")
@@ -80,9 +78,8 @@ public class AuthController {
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
 
-		return new ResponseEntity<>(
-				new JWTResponse(userDetails.getUserId(), userDetails.getUsername(), userDetails.getEmail(), token),
-				HttpStatus.OK);
+		return ResponseHandler.generateResponse("Login Successful!", HttpStatus.OK,
+				new JWTResponse(userDetails.getUserId(), userDetails.getUsername(), userDetails.getEmail(), token));
 	}
 
 	@PutMapping("/update")
@@ -99,22 +96,22 @@ public class AuthController {
 
 			// Update user details
 			try {
-				updateUser(username, request);
-				return ResponseEntity.ok("User details updated successfully.");
+				User updatedUser = updateUser(username, request);
+				return ResponseHandler.generateResponse("User updated successfully!", HttpStatus.OK, updatedUser);
 			} catch (UserNotFoundException e) {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
+				return ResponseHandler.generateResponse("User does not exist!", HttpStatus.NOT_FOUND, null);
 			} catch (InvalidUsernameException e) {
-				return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Unauthorized access.");
+				return ResponseHandler.generateResponse("Unauthorized access!", HttpStatus.UNAUTHORIZED, null);
 			} catch (Exception e) {
-				return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-						.body("User details could not be updated");
+				return ResponseHandler.generateResponse("User could not be updated!", HttpStatus.INTERNAL_SERVER_ERROR,
+						null);
 			}
 		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+			return ResponseHandler.generateResponse("User not logged in!", HttpStatus.UNAUTHORIZED, null);
 		}
 	}
 
-	private void updateUser(String username, UpdateRequest request) throws UserNotFoundException, Exception {
+	private User updateUser(String username, UpdateRequest request) throws UserNotFoundException, Exception {
 		// Retrieve the user from the database
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new UserNotFoundException("User not found"));
@@ -143,6 +140,6 @@ public class AuthController {
 		}
 
 		// Save the updated user object
-		userRepository.save(user);
+		return userRepository.save(user);
 	}
 }

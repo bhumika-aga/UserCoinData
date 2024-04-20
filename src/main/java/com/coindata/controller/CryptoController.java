@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.coindata.exception.InvalidUsernameException;
 import com.coindata.exception.UserNotFoundException;
-import com.coindata.model.entity.User;
+import com.coindata.model.User;
 import com.coindata.model.response.CryptoData;
 import com.coindata.repository.CryptoDataRepository;
 import com.coindata.repository.UserRepository;
@@ -75,11 +75,13 @@ public class CryptoController {
 			List<String> symbols = Arrays.asList(symbol.split(","));
 
 			byte[] byteData = null;
+			Blob blob = null;
+			CryptoData data = null;
 			try {
 				for (String symbolString : symbols) {
 					byteData = new ObjectMapper().writeValueAsBytes(response.getBody().get("data").get(symbolString));
-					Blob blob = new SerialBlob(byteData);
-					CryptoData data = new CryptoData(username, symbolString,
+					blob = new SerialBlob(byteData);
+					data = new CryptoData(username, symbolString,
 							response.getBody().get("status").get("timestamp").toString(), blob);
 					saveResponse(username, data);
 				}
@@ -94,7 +96,7 @@ public class CryptoController {
 			// Check if the request was successful (HTTP status code 200)
 			if (response.getStatusCode() == HttpStatus.OK) {
 				// Extract and return the response body
-				return new ResponseEntity<>(response, HttpStatus.OK);
+				return new ResponseEntity<>(data, HttpStatus.OK);
 			} else {
 				// Handle error responses
 				return new ResponseEntity<>(response.getBody(), response.getStatusCode());

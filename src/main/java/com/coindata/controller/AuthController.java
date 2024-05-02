@@ -26,7 +26,7 @@ import com.coindata.model.User;
 import com.coindata.model.request.LoginRequest;
 import com.coindata.model.request.SignUpRequest;
 import com.coindata.model.request.UpdateRequest;
-import com.coindata.model.response.JWTResponse;
+import com.coindata.model.response.LoginResponse;
 import com.coindata.model.response.UserResponse;
 import com.coindata.repository.UserRepository;
 import com.coindata.service.impl.UserDetailsImpl;
@@ -86,7 +86,7 @@ public class AuthController {
 		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
 
 		return ResponseHandler.generateResponse("Login Successful!", HttpStatus.OK, now().toString(),
-				new JWTResponse(userDetails.getUserId(), userDetails.getUsername(), userDetails.getEmail(), token));
+				new LoginResponse(userDetails.getUserId(), userDetails.getUsername(), userDetails.getEmail(), token));
 	}
 
 	@PutMapping("/update")

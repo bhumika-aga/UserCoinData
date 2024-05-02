@@ -1,6 +1,6 @@
 package com.coindata.model.response;
 
-public class JWTResponse {
+public class LoginResponse {
 
 	private Long id;
 	private String username;
@@ -48,7 +48,7 @@ public class JWTResponse {
 		this.tokenType = tokenType;
 	}
 
-	public JWTResponse(Long id, String username, String email, String accessToken) {
+	public LoginResponse(Long id, String username, String email, String accessToken) {
 		this.id = id;
 		this.username = username;
 		this.email = email;

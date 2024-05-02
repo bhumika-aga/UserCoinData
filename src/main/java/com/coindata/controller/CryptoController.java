@@ -1,9 +1,13 @@
 package com.coindata.controller;
 
+import static java.time.LocalDateTime.now;
+
 import java.sql.Blob;
 import java.sql.SQLException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.sql.rowset.serial.SerialBlob;
 import javax.sql.rowset.serial.SerialException;
@@ -73,17 +77,20 @@ public class CryptoController {
 			// Make the HTTP GET request and get the response as a String
 			ResponseEntity<JsonNode> response = restTemplate.exchange(url, HttpMethod.GET, entity, JsonNode.class);
 			List<String> symbols = Arrays.asList(symbol.split(","));
+			Map<String, String> data = new HashMap<>();
 
 			byte[] byteData = null;
 			Blob blob = null;
-			CryptoData data = null;
+			CryptoData cryptoData = null;
 			try {
 				for (String symbolString : symbols) {
 					byteData = new ObjectMapper().writeValueAsBytes(response.getBody().get("data").get(symbolString));
 					blob = new SerialBlob(byteData);
-					data = new CryptoData(username, symbolString,
+					cryptoData = new CryptoData(username, symbolString,
 							response.getBody().get("status").get("timestamp").toString(), blob);
-					saveResponse(username, data);
+					data.put("username", username);
+					data.put(symbolString, response.getBody().get("data").get(symbolString).toString());
+					saveResponse(username, cryptoData);
 				}
 			} catch (JsonProcessingException e) {
 				e.printStackTrace();
@@ -96,13 +103,20 @@ public class CryptoController {
 			// Check if the request was successful (HTTP status code 200)
 			if (response.getStatusCode() == HttpStatus.OK) {
 				// Extract and return the response body
-				return new ResponseEntity<>(data, HttpStatus.OK);
+				return ResponseHandler.generateResponse("Data found!", HttpStatus.OK,
+						response.getBody().get("status").get("timestamp").toString(),
+						data);
 			} else {
 				// Handle error responses
-				return new ResponseEntity<>(response.getBody(), response.getStatusCode());
+				return ResponseHandler.generateResponse(
+						"Error: " + response.getBody().get("status").get("error_message"),
+						(HttpStatus) response.getStatusCode(),
+						response.getBody().get("status").get("timestamp").toString(),
+						response.getBody());
 			}
 		} else {
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not logged in.");
+			return ResponseHandler.generateResponse("User not logged in.", HttpStatus.UNAUTHORIZED, now().toString(),
+					null);
 		}
 	}
 

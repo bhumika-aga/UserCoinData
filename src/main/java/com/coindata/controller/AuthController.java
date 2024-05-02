@@ -1,5 +1,7 @@
 package com.coindata.controller;
 
+import static java.time.LocalDateTime.now;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +27,7 @@ import com.coindata.model.request.LoginRequest;
 import com.coindata.model.request.SignUpRequest;
 import com.coindata.model.request.UpdateRequest;
 import com.coindata.model.response.JWTResponse;
+import com.coindata.model.response.UserResponse;
 import com.coindata.repository.UserRepository;
 import com.coindata.service.impl.UserDetailsImpl;
 
@@ -51,11 +54,13 @@ public class AuthController {
 	@PostMapping("/signup")
 	public ResponseEntity<?> signup(@Valid @RequestBody SignUpRequest request) {
 		if (Boolean.TRUE.equals(userRepository.existsByUsername(request.getUsername()))) {
-			return ResponseHandler.generateResponse("Username Already Exists", HttpStatus.BAD_REQUEST, null);
+			return ResponseHandler.generateResponse("Username Already Exists", HttpStatus.BAD_REQUEST, now().toString(),
+					null);
 		}
 
 		if (Boolean.TRUE.equals(userRepository.existsByEmail(request.getEmail()))) {
-			return ResponseHandler.generateResponse("Email Already Exists", HttpStatus.BAD_REQUEST, null);
+			return ResponseHandler.generateResponse("Email Already Exists", HttpStatus.BAD_REQUEST, now().toString(),
+					null);
 		}
 
 		// Create new user's account
@@ -64,7 +69,9 @@ public class AuthController {
 
 		userRepository.save(user);
 
-		return ResponseHandler.generateResponse("User registered successfully!", HttpStatus.OK, user);
+		return ResponseHandler.generateResponse("User registered successfully!", HttpStatus.OK, now().toString(),
+				new UserResponse(user.getFirstName(), user.getLastName(), user.getEmail(), user.getMobile(),
+						user.getUsername()));
 	}
 
 	@PostMapping("/login")
@@ -78,7 +85,7 @@ public class AuthController {
 
 		UserDetailsImpl userDetails = (UserDetailsImpl) auth.getPrincipal();
 
-		return ResponseHandler.generateResponse("Login Successful!", HttpStatus.OK,
+		return ResponseHandler.generateResponse("Login Successful!", HttpStatus.OK, now().toString(),
 				new JWTResponse(userDetails.getUserId(), userDetails.getUsername(), userDetails.getEmail(), token));
 	}
 
@@ -97,30 +104,31 @@ public class AuthController {
 			// Update user details
 			try {
 				User updatedUser = updateUser(username, request);
-				return ResponseHandler.generateResponse("User updated successfully!", HttpStatus.OK, updatedUser);
+				return ResponseHandler.generateResponse("User updated successfully!", HttpStatus.OK, now().toString(),
+						new UserResponse(updatedUser.getFirstName(), updatedUser.getLastName(), updatedUser.getEmail(),
+								updatedUser.getMobile(),
+								updatedUser.getUsername()));
 			} catch (UserNotFoundException e) {
-				return ResponseHandler.generateResponse("User does not exist!", HttpStatus.NOT_FOUND, null);
+				return ResponseHandler.generateResponse("User does not exist!", HttpStatus.NOT_FOUND, now().toString(),
+						null);
 			} catch (InvalidUsernameException e) {
-				return ResponseHandler.generateResponse("Unauthorized access!", HttpStatus.UNAUTHORIZED, null);
+				return ResponseHandler.generateResponse("Unauthorized access!", HttpStatus.UNAUTHORIZED,
+						now().toString(), null);
 			} catch (Exception e) {
 				return ResponseHandler.generateResponse("User could not be updated!", HttpStatus.INTERNAL_SERVER_ERROR,
+						now().toString(),
 						null);
 			}
 		} else {
-			return ResponseHandler.generateResponse("User not logged in!", HttpStatus.UNAUTHORIZED, null);
+			return ResponseHandler.generateResponse("User not logged in!", HttpStatus.UNAUTHORIZED, now().toString(),
+					null);
 		}
 	}
 
 	private User updateUser(String username, UpdateRequest request) throws UserNotFoundException, Exception {
-		// Retrieve the user from the database
 		User user = userRepository.findByUsername(username)
 				.orElseThrow(() -> new UserNotFoundException("User not found"));
 
-		// Check if the current user has permission to update the details
-		// This could be based on roles or any other criteria
-		// For simplicity, let's assume any logged-in user can update their own details
-		// You might want to implement more fine-grained authorization logic
-		// using Spring Security annotations or custom authorization logic
 		if (!user.getUsername().equals(username)) {
 			throw new InvalidUsernameException("Unauthorized access");
 		}

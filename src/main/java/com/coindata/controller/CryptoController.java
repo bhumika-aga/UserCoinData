@@ -29,8 +29,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.coindata.exception.InvalidUsernameException;
 import com.coindata.exception.UserNotFoundException;
+import com.coindata.model.CryptoData;
 import com.coindata.model.User;
-import com.coindata.model.response.CryptoData;
 import com.coindata.repository.CryptoDataRepository;
 import com.coindata.repository.UserRepository;
 import com.coindata.service.impl.UserDetailsImpl;

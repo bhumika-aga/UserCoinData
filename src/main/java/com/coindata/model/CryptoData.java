@@ -1,4 +1,4 @@
-package com.coindata.model.response;
+package com.coindata.model;
 
 import java.sql.Blob;
 

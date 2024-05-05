@@ -4,13 +4,13 @@ import static java.time.LocalDateTime.now;
 
 import java.sql.Blob;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import javax.sql.rowset.serial.SerialBlob;
-import javax.sql.rowset.serial.SerialException;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.util.SerializationUtils;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -34,9 +35,9 @@ import com.coindata.model.User;
 import com.coindata.repository.CryptoDataRepository;
 import com.coindata.repository.UserRepository;
 import com.coindata.service.impl.UserDetailsImpl;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+
+import io.jsonwebtoken.io.SerialException;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
 @RestController
@@ -79,21 +80,24 @@ public class CryptoController {
 			List<String> symbols = Arrays.asList(symbol.split(","));
 			Map<String, String> data = new HashMap<>();
 
-			byte[] byteData = null;
+			data.put("username", username);
+
+			byte[] crypto = null;
 			Blob blob = null;
 			CryptoData cryptoData = null;
 			try {
 				for (String symbolString : symbols) {
-					byteData = new ObjectMapper().writeValueAsBytes(response.getBody().get("data").get(symbolString));
-					blob = new SerialBlob(byteData);
+					List<Map<String, String>> responseData = new ArrayList<>();
+					for (JsonNode jsonNode : response.getBody().get("data").get(symbolString)) {
+						responseData.add(getAttributes(jsonNode));
+					}
+					crypto = SerializationUtils.serialize(responseData);
+					blob = new SerialBlob(crypto);
 					cryptoData = new CryptoData(username, symbolString,
 							response.getBody().get("status").get("timestamp").toString(), blob);
-					data.put("username", username);
-					data.put(symbolString, response.getBody().get("data").get(symbolString).toString());
+					data.put(symbolString, responseData.toString());
 					saveResponse(username, cryptoData);
 				}
-			} catch (JsonProcessingException e) {
-				e.printStackTrace();
 			} catch (SerialException e) {
 				e.printStackTrace();
 			} catch (SQLException e) {
@@ -104,7 +108,7 @@ public class CryptoController {
 			if (response.getStatusCode() == HttpStatus.OK) {
 				// Extract and return the response body
 				return ResponseHandler.generateResponse("Data found!", HttpStatus.OK,
-						response.getBody().get("status").get("timestamp").toString(),
+						response.getBody().get("status").get("timestamp").textValue(),
 						data);
 			} else {
 				// Handle error responses
@@ -129,5 +133,15 @@ public class CryptoController {
 		}
 
 		cryptoRepository.saveAndFlush(data);
+	}
+
+	private Map<String, String> getAttributes(JsonNode response) {
+		Map<String, String> attributes = new HashMap<>();
+
+		attributes.put("name", response.get("name").asText());
+		attributes.put("symbol", response.get("symbol").asText());
+		attributes.put("USD Price", response.get("quote").get("USD").get("price").asText());
+
+		return attributes;
 	}
 }

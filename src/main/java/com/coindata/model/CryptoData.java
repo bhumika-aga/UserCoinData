@@ -74,7 +74,8 @@ public class CryptoData {
 	public CryptoData() {
 	}
 
-	public CryptoData(@NotNull String username, @NotNull String symbols, String timestamp, Blob data) {
+	public CryptoData(@NotNull String username, @NotNull String symbols, String timestamp,
+			Blob data) {
 		this.username = username;
 		this.symbols = symbols;
 		this.timestamp = timestamp;

@@ -23,6 +23,9 @@ public class UpdateRequest {
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character")
 	private String password;
 
+	@Pattern(regexp = "^[a-zA-Z0-9]{10}$", message = "The PAN No. must be of the form ABCDE1234F")
+	private String userPan;
+
 	public String getUsername() {
 		return username;
 	}
@@ -61,5 +64,13 @@ public class UpdateRequest {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getUserPan() {
+		return userPan;
+	}
+
+	public void setUserPan(String userPan) {
+		this.userPan = userPan;
 	}
 }

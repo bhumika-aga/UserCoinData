@@ -43,6 +43,9 @@ public class User {
 	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character")
 	private String password;
 
+	@Pattern(regexp = "^[a-zA-Z0-9]{10}$", message = "The PAN No. must be of the form ABCDE1234F")
+	private String userPan;
+
 	public Long getUserId() {
 		return userId;
 	}
@@ -95,6 +98,14 @@ public class User {
 		return password;
 	}
 
+	public String getUserPan() {
+		return userPan;
+	}
+
+	public void setUserPan(String userPan) {
+		this.userPan = userPan;
+	}
+
 	public void setPassword(String password) {
 		this.password = password;
 	}
@@ -112,11 +123,13 @@ public class User {
 
 	public User(@NotBlank String firstName, @NotBlank String lastName,
 			@NotBlank @Pattern(regexp = "\\d{10}", message = "Phone number must be a 10-digit number") String mobile,
-			@Size(min = 8, max = 15, message = "Password length must be between 8 and 15 characters") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character") String password) {
+			@Size(min = 8, max = 15, message = "Password length must be between 8 and 15 characters") @Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]+$", message = "Password must contain at least 1 uppercase letter, 1 lowercase letter, 1 digit, and 1 special character") String password,
+			@NotBlank @Pattern(regexp = "^[a-zA-Z0-9]{10}$", message = "The PAN No. must be of the form ABCDE1234F") String userPan) {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.mobile = mobile;
 		this.password = password;
+		this.userPan = userPan;
 	}
 
 	public User(@NotBlank String firstName, @NotBlank String lastName, @NotBlank @Email String email,
@@ -130,4 +143,5 @@ public class User {
 		this.username = username;
 		this.password = password;
 	}
+
 }

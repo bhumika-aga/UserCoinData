@@ -7,6 +7,7 @@ public class UserResponse {
     private String email;
     private String mobile;
     private String username;
+    private String userPan;
 
     public String getFirstName() {
         return firstName;
@@ -48,11 +49,29 @@ public class UserResponse {
         this.username = username;
     }
 
+    public String getUserPan() {
+        return userPan;
+    }
+
+    public void setUserPan(String userPan) {
+        this.userPan = userPan;
+    }
+
     public UserResponse(String firstName, String lastName, String email, String mobile, String username) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.email = email;
         this.mobile = mobile;
         this.username = username;
+    }
+
+    public UserResponse(String firstName, String lastName, String email, String mobile, String username,
+            String userPan) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.email = email;
+        this.mobile = mobile;
+        this.username = username;
+        this.userPan = userPan;
     }
 }

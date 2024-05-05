@@ -106,8 +106,7 @@ public class AuthController {
 				User updatedUser = updateUser(username, request);
 				return ResponseHandler.generateResponse("User updated successfully!", HttpStatus.OK, now().toString(),
 						new UserResponse(updatedUser.getFirstName(), updatedUser.getLastName(), updatedUser.getEmail(),
-								updatedUser.getMobile(),
-								updatedUser.getUsername()));
+								updatedUser.getMobile(), updatedUser.getUsername(), request.getUserPan()));
 			} catch (UserNotFoundException e) {
 				return ResponseHandler.generateResponse("User does not exist!", HttpStatus.NOT_FOUND, now().toString(),
 						null);
@@ -145,6 +144,9 @@ public class AuthController {
 		}
 		if (request.getPassword() != null) {
 			user.setPassword(encoder.encode(request.getPassword()));
+		}
+		if (request.getUserPan() != null) {
+			user.setUserPan(encoder.encode(request.getUserPan()));
 		}
 
 		// Save the updated user object
